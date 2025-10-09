@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "subset",
+    "subset-derive"
+]
+resolver = "3"
