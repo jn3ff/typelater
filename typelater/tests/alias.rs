@@ -1,4 +1,5 @@
-use subset::Subset;
+use typelater::Typelater;
+
 #[allow(dead_code)]
 #[derive(Debug)]
 struct User {
@@ -7,10 +8,10 @@ struct User {
     last_login: chrono::DateTime<chrono::Utc>,
 }
 
-#[derive(Debug, Subset)]
-#[subset(from = "User")]
+#[derive(Debug, Typelater)]
+#[typelater(from = "User")]
 struct PublicUser {
-    #[subset(alias = "username")]
+    #[typelater(alias = "username")]
     name: String,
 }
 

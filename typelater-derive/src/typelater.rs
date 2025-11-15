@@ -1,15 +1,15 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use syn::{
-    Data, DeriveInput, Field, Ident, LitStr, Result, Token,
     parse::{Parse, ParseStream},
+    Data, DeriveInput, Field, Ident, LitStr, Result, Token,
 };
 
-struct SubsetAttr {
+struct TypelaterAttr {
     from: LitStr,
 }
 
-impl Parse for SubsetAttr {
+impl Parse for TypelaterAttr {
     fn parse(input: ParseStream) -> Result<Self> {
         let ident: Ident = input.parse()?;
         if ident != "from" {
@@ -17,19 +17,19 @@ impl Parse for SubsetAttr {
         }
         input.parse::<Token![=]>()?;
         let from: LitStr = input.parse()?;
-        Ok(SubsetAttr { from })
+        Ok(TypelaterAttr { from })
     }
 }
 
-pub fn impl_subset(input: DeriveInput) -> TokenStream2 {
+pub fn impl_typelater(input: DeriveInput) -> TokenStream2 {
     let struct_name = input.ident;
 
     let source_type_ident: Ident = match input
         .attrs
         .iter()
-        .find(|attr| attr.path().is_ident("subset"))
+        .find(|attr| attr.path().is_ident("typelater"))
         .and_then(|attr| {
-            attr.parse_args::<SubsetAttr>()
+            attr.parse_args::<TypelaterAttr>()
                 .ok()
                 .map(|a| Ident::new(&a.from.value(), a.from.span()))
         }) {
@@ -37,7 +37,7 @@ pub fn impl_subset(input: DeriveInput) -> TokenStream2 {
         None => {
             return syn::Error::new_spanned(
                 &struct_name,
-                "Expected #[subset(from = \"SourceType\")]",
+                "Expected #[typelater(from = \"SourceType\")]",
             )
             .to_compile_error();
         }
@@ -53,8 +53,11 @@ pub fn impl_subset(input: DeriveInput) -> TokenStream2 {
             quote! { #target_ident: #rhs }
         }),
         _ => {
-            return syn::Error::new_spanned(&struct_name, "Subset can only be derived on structs")
-                .to_compile_error();
+            return syn::Error::new_spanned(
+                &struct_name,
+                "Typelater can only be derived on structs",
+            )
+            .to_compile_error();
         }
     };
 
@@ -65,7 +68,7 @@ pub fn impl_subset(input: DeriveInput) -> TokenStream2 {
             }
         }
 
-        impl subset::Subset<#source_type_ident> for #struct_name {}
+        impl typelater::Typelater<#source_type_ident> for #struct_name {}
     }
 }
 
@@ -74,12 +77,12 @@ pub fn impl_subset(input: DeriveInput) -> TokenStream2 {
 /// - alias:   `source.<alias_ident>`
 /// - path:    `source.<seg0>.<seg1>...`
 fn field_rhs_tokens(field: &Field, target_ident: &Ident) -> TokenStream2 {
-    // Look for #[subset(...)] on the field
+    // Look for #[typelater(...)] on the field
     let mut alias_lit: Option<LitStr> = None;
     let mut path_lit: Option<LitStr> = None;
 
     for attr in &field.attrs {
-        if attr.path().is_ident("subset") {
+        if attr.path().is_ident("typelater") {
             let res: Result<()> = attr.parse_nested_meta(|meta| {
                 if meta.path.is_ident("alias") {
                     let lit: LitStr = meta.value()?.parse()?;
@@ -90,7 +93,7 @@ fn field_rhs_tokens(field: &Field, target_ident: &Ident) -> TokenStream2 {
                     path_lit = Some(lit);
                     Ok(())
                 } else {
-                    Err(meta.error("unsupported subset attribute; expected `alias` or `path`"))
+                    Err(meta.error("unsupported typelater attribute; expected `alias` or `path`"))
                 }
             });
             // If parse_nested_meta fails, return a compile error at the attribute

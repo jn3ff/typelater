@@ -1,4 +1,4 @@
-use subset::Subset;
+use typelater::Typelater;
 
 #[allow(dead_code)]
 struct UserMetadata {
@@ -13,11 +13,11 @@ struct User {
     metadata: UserMetadata,
 }
 
-#[derive(Subset)]
-#[subset(from = "User")]
+#[derive(Typelater)]
+#[typelater(from = "User")]
 struct PublicUser {
     username: String,
-    #[subset(path = "metadata.followers")]
+    #[typelater(path = "metadata.followers")]
     followers: usize,
 }
 

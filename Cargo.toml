@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "subset",
-    "subset-derive"
+    "typelater",
+    "typelater-derive"
 ]
 resolver = "3"

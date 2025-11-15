@@ -1,10 +1,10 @@
 [package]
-name = "subset"
+name = "typelater"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-subset-derive = { path = "../subset-derive"}
+typelater-derive = { path = "../typelater-derive"}
 
 [lib]
 proc-macro = false

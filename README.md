@@ -1,4 +1,6 @@
-# Subset
+# Typelater
+
+Foundational types and their children make me want to type later
 
 ## Status/Version
 
@@ -6,7 +8,7 @@ Unpublished
 
 ## Justification
 
-This crate contains a very simple derive macro for when you want to easily convert between types, subject to one type being a logical field-subset of another. For example, consider the simple example between User and PublicUser.
+This crate contains a very simple derive macro for when you want to easily convert between types, subject to one type being a logical field-transform of another. For example, consider the simple example between User and PublicUser.
 
 ```rust
 struct User {
@@ -49,12 +51,12 @@ impl From<User> for PublicUser {
 }
 ```
 
-Super easy. And tedious! Especially if we have multiple view structs for various contracts. Subset generates the same code, but with a simpler api (especially when there are more than 3 fields).
+Super easy. And tedious! Especially if we have multiple view structs for various contracts. Typelater generates the same code, but with a simpler api (especially when there are more than 3 fields).
 
 ## Example
 
 ```rust
-use subset::Subset;
+use typelater::Typelater;
 
 struct User {
     username: String,
@@ -62,17 +64,17 @@ struct User {
     last_login: chrono::DateTime<chrono::Utc>
 }
 
-#[derive(Subset)]
-#[subset(from = "User")]
+#[derive(Typelater)]
+#[typelater(from = "User")]
 struct PublicUser {
     username: String,
 }
 ```
 
-Subset supports aliasing fields, like:
+Typelater supports aliasing fields, like:
 
 ```rust
-use subset::Subset;
+use typelater::Typelater;
 
 struct User {
     username: String,
@@ -80,18 +82,18 @@ struct User {
     last_login: chrono::DateTime<chrono::Utc>
 }
 
-#[derive(Subset)]
-#[subset(from = "User")]
+#[derive(Typelater)]
+#[typelater(from = "User")]
 struct PublicUser {
-    #[subset(alias = "username")]
+    #[typelater(alias = "username")]
     name: String,
 }
 ```
 
-Subset supports nested fields, like:
+Typelater supports nested fields, like:
 
 ```rust
-use subset::Subset;
+use typelater::Typelater;
 
 struct UserMetadata {
     followers: usize,
@@ -104,13 +106,18 @@ struct User {
     metadata: UserMetadata,
 }
 
-#[derive(Subset)]
-#[subset(from = "User")]
+#[derive(Typelater)]
+#[typelater(from = "User")]
 struct PublicUser {
     username: String,
-    #[subset(path = "metadata.followers")]
+    #[typelater(path = "metadata.followers")]
     followers: usize,
 }
 ```
 
 The need for this crate is dubious, but I wanted to learn more about proc macros and this is the lens I have chosen to do it under.
+
+TODO:
+
+- [ ] Add generate option when the "child" has overflowing fields (e.g. we need to generate display fields in DTOs)
+- [ ] Add default option when the "child" has overflowing fields (e.g. we're gonna do something else with this value now)
